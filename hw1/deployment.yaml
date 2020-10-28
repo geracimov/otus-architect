@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: simple-http-server-deployment
+spec:
+    replicas: 3
+    selector:
+       matchLabels:
+          app: simple-http-server-label
+    template:
+       metadata:
+          labels:
+             app: simple-http-server-label
+       spec:
+          containers:
+          - name: simple-http-server-container
+            image: geracimov/simple-http-server:1.0
+            ports:
+              - name: http
+                containerPort: 8000
+            startupProbe:
+                httpGet:
+                    path: /health
+                    port: 8000
+                failureThreshold: 3
+                periodSeconds: 10
+            readinessProbe:
+                httpGet:
+                    path: /health
+                    port: 8000
+                initialDelaySeconds: 2
+                periodSeconds: 10
+            livenessProbe:
+                httpGet:
+                    path: /health
+                    port: 8000
+                initialDelaySeconds: 2
+                periodSeconds: 5
