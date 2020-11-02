@@ -1,0 +1,120 @@
+replicaCount: 3
+
+image:
+  repository: geracimov/crud-simple
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "1.0"
+
+imagePullSecrets: [ ]
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: { }
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: { }
+
+podSecurityContext: { }
+# fsGroup: 2000
+
+securityContext: { }
+  # capabilities:
+  #   drop:
+#   - ALL
+# readOnlyRootFilesystem: true
+# runAsNonRoot: true
+# runAsUser: 1000
+
+service:
+  type: NodePort
+  port: 8080
+
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+  hosts:
+    - host: arch.homework
+      paths:
+        - path: /otusapp/\w+/(.+)
+          pathType: Exact
+  tls: []
+resources:
+  limits:
+    cpu: 1
+    memory: 256Mi
+  requests:
+    cpu: 1
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: { }
+
+tolerations: [ ]
+
+affinity: { }
+
+ports:
+  - name: http-backend
+    containerPort: 8080
+    protocol: TCP
+
+envs:
+  - name: DATASOURCE_URI
+    valueFrom:
+      configMapKeyRef:
+        name: crud-simple-config
+        key: DATASOURCE_URI
+  - name: DATASOURCE_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: crud-simple-secret
+        key: DATASOURCE_USERNAME
+  - name: DATASOURCE_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: crud-simple-secret
+        key: DATASOURCE_PASSWORD
+probes:
+  startupProbe:
+    httpGet:
+      path: /actuator/health
+      port: http-backend
+    failureThreshold: 12
+    periodSeconds: 5
+    timeoutSeconds: 3
+  livenessProbe:
+    httpGet:
+      path: /actuator/health
+      port: http-backend
+    initialDelaySeconds: 20
+    periodSeconds: 5
+    timeoutSeconds: 3
+  readinessProbe:
+    httpGet:
+      path: /actuator/health
+      port: http-backend
+    initialDelaySeconds: 20
+    periodSeconds: 5
+    timeoutSeconds: 3
+
+postgresql:
+  enabled: true
+  postgresqlUsername: crudSimpleUser
+  postgresqlPassword: crudSimplePassword
+  postgresqlDatabase: crudSimpleDb
+  service:
+    port: 5432
