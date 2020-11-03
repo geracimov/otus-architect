@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crud-simple-config
+data:
+  DATASOURCE_URI: jdbc:postgresql://postgres-servicename:5432/crudSimpleDb
+

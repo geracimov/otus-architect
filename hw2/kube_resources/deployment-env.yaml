@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crud-simple-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: crud-simple-label
+  template:
+    metadata:
+      labels:
+        app: crud-simple-label
+    spec:
+      containers:
+        - name: crud-simple-container
+          image: geracimov/crud-simple:1.0
+          env:
+            - name: DATASOURCE_URI
+              value: jdbc:postgresql://postgres-servicename:5432/crudSimpleDb
+            - name: DATASOURCE_USERNAME
+              value: crudSimpleUser
+            - name: DATASOURCE_PASSWORD
+              value: crudSimplePassword
+          ports:
+            - name: http
+              containerPort: 8080
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 12
+            failureThreshold: 3
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 5
