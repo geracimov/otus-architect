@@ -1,0 +1,9 @@
+apiVersion: skaffold/v2beta8
+kind: Config
+metadata:
+  name: hw-2
+deploy:
+  kubectl:
+    manifests:
+    - deployment-env.yaml
+    - service.yaml
